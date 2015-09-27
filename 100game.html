@@ -2,8 +2,8 @@
 <html>
 <head>
 <meta charset="utf-8">
-<!-- メモ：旧バージョンを保存すること -->
-
+<meta name="viewport" content="width=800px, initial-scale=1.0">
+<!-- ここに user-scalable=no をつけると拡大縮小できなくなるが、使いにくいので書かないことにする -->
 
 <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script-->
 <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
@@ -22,13 +22,14 @@
 
 <!-- ここからメイン -------------------------------------------------- -->
 <style type="text/css">
-  .sheet {                                   /* 表全体 */
-     background: #eee;
-     position: relative;
-     top: 0px;
-     border: 0px;
-     border-spacing: 0px;
-   }
+  .sheet {                                    /* 表全体 */
+    background: #eee;
+    position: relative;
+    top: 0px;
+    border: 0px;
+    border-spacing: 0px;
+    z-index: 1;
+  }
   .sheet tr {                                /* 各列 */
     border: 2px;
   }
@@ -57,6 +58,7 @@
     position: absolute;
     top: 0px;
     left: -40px;
+    z-index: 2;
   }
   .sheetCompleteText {                       /* スコア等の表示。最初は隠れている */
     display: none;
@@ -68,7 +70,30 @@
     position: absolute;
     top: 200px;
     left: 100px;
+    z-index: 3;
   }
+  .softkey {                                 /* ソフトウェアキーボード */
+    display: none;
+    position: absolute;
+    z-index: 4;
+    background: white;
+  }
+  .softkey table {
+    border-style: solid;
+    border-width: 10px;
+    border-color: green
+  }
+  .softkey td {
+    width: 60px;
+    height: 60px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: green;
+    text-align: center;
+    color: green;
+    font-weight: bold;
+  }
+
 </style>
 
 
@@ -143,6 +168,61 @@ function focusColumnSub (x, y, a)
   // 座標(x,y)の色を付ける/消す。x,y は1～10の数字
 function focusColumn (x, y)   { focusColumnSub (x, y, 1) };
 function unfocusColumn (x, y) { focusColumnSub (x, y, 2) };
+
+
+
+// --------------------------------------------------
+function showSoftKey(x,y)
+  // ソフトウェアキーボードの表示
+{
+  var columnName  = makeColumnName(x, y);
+
+  var top = $(columnName).offset().top + 60;
+  var left = $(columnName).offset().left;
+
+  var width = $("#softkey").width();
+
+  if(left > width - 40)
+  {
+    left -= width - 80;
+  }
+  else
+  {
+    left -= 20;
+  }
+
+
+  $("#softkey").show();
+  $("#softkey").css('top',  top);
+  $("#softkey").css('left', left);
+}
+
+
+// --------------------------------------------------
+function hideSoftKey()
+  // ソフトウェアキーボードの消去
+{
+  $("#softkey").hide();
+}
+
+
+
+// --------------------------------------------------
+function showHideSoftKey()
+  // softkeyEnabled の値にしたがって、ソフトウェアキーボードを表示したり消したりする
+{
+  var showFlag = $("#softkeyEnabled").prop("checked");
+  if(showFlag)
+  {
+    var x = $("#currentColumnX").val();
+    var y = $("#currentColumnY").val();
+    showSoftKey(x,y);
+  }
+  else
+  {
+    hideSoftKey();
+  }
+}
 
 
 
@@ -337,6 +417,8 @@ function gotoXY(x,y)
   $("#currentColumnY").val(y);
   focusColumn(x,y);
 
+  showHideSoftKey();                         // ソフトウェアキーボードの表示
+
   var columnNameX = makeColumnName(x, 0);    // 上に書いてある数値
   var valueX = $(columnNameX).text();
 
@@ -381,12 +463,6 @@ $(window).keydown(function(e)
   else if(k==8   || k==46) {  n=10;  }  // 「BS」「DEL」
 
 
-  if(window.navigator.userAgent.indexOf("Android") != -1)  // Android Chrome対応
-  {
-    $("#keyboardEnabler").blur();
-    $("#keyboardEnabler").focus();
-  }
-
   if(n != -1)
   {
     e.preventDefault();
@@ -396,7 +472,6 @@ $(window).keydown(function(e)
 
  return true;
 });
-
 
 
 // --------------------------------------------------
@@ -555,7 +630,6 @@ function inputandCheckAnswer(n)
 }
 
 
-
 // --------------------------------------------------
 function gotoNext(skipFlag)
   // 次のマスへ移動
@@ -671,6 +745,8 @@ function finishRow(y)
 function finishAllColumn()
   // 全マス終わったときの処理
 {
+  hideSoftKey();
+
   var score = $("#score").val();
 
   var endTime = new Date();                             // 解答時間を求める
@@ -699,13 +775,22 @@ function finishAllColumn()
 // --------------------------------------------------
 function main()
 {
+  if(window.navigator.userAgent.indexOf("Android") != -1  ||      // 端末を判定して、ソフトキーを表示するか否かの初期値を設定
+     window.navigator.userAgent.indexOf("iPhone")  != -1  ||
+     window.navigator.userAgent.indexOf("iPad")    != -1 )
+  {
+    $("#softkeyEnabled").prop("checked", true);
+  }
+
+
   remake();
   gotoXY(startX, startY);
-  //$("#startButton").blur();  // 「最初から」ボタンを押した後に、スペースキー等入力によるご動作を防ぐ
-  $("#keyboardEnabler").focus();  // スマホ対応
+  //$("#startButton").blur();  // 「最初から」ボタンを押した後に、スペースキー等入力による誤動作を防ぐ
 }
 
+
 // --------------------------------------------------
+
 </script>
 
 </head>
@@ -727,14 +812,8 @@ function main()
 </select>
 　<button id="startButton" onclick="main()">はじめから</button>
 　　スコア <input type="text" size=2 id="score">
- （ <select name="passScore" id="passScore">
-<option value="100">100
-<option value="98">98
-<option value="95" selected>95
-<option value="90">90
-<option value="1">1
-</select> 点でクリア）
 　音<input type="checkbox" id="soundEnabled" checked="checked">
+　キーボード<input type="checkbox" id="softkeyEnabled" onchange="showHideSoftKey()">
 <br>
 <br>
 
@@ -744,26 +823,50 @@ function main()
   <div class="sheetCompleteText" id="sheetCompleteText"><!-- ここに得点などを表示 --></div>
 </div>
 
-<br>
-タブレットなら、ここをタップ。キーボードが出ます → <input type="number" id="keyboardEnabler" style="ime-mode: disabled; width: 50px" pattern="\d*">
+<!-- ソフトウェアキーボード -->
+<div id="softkey" class="softkey">
+<table>
+<tr>
+<td onclick="inputandCheckAnswer(1)">1
+<td onclick="inputandCheckAnswer(2)">2
+<td onclick="inputandCheckAnswer(3)">3
+<td onclick="inputandCheckAnswer(4)">4
+<td onclick="inputandCheckAnswer(5)">5
+<td rowspan=2 onclick="inputandCheckAnswer(10)">←
+<tr>
+<td onclick="inputandCheckAnswer(6)">6
+<td onclick="inputandCheckAnswer(7)">7
+<td onclick="inputandCheckAnswer(8)">8
+<td onclick="inputandCheckAnswer(9)">9
+<td onclick="inputandCheckAnswer(0)">0
+</table>
+</div>
 
 <br>
 <div  class="controller"><!-- ここはリリース時には表示されない部分 -->
+ 設定：<select name="passScore" id="passScore">
+ <option value="100">100
+ <option value="98">98
+ <option value="95" selected>95
+ <option value="90">90
+ <option value="1">1
+ </select> 点でクリア
+ <br><br>
  タイプ：<input type="text" size=4 id="calcTypeStr">
  X: <input type="text" size=1 id="currentColumnX">
- Y: <input type="text" size=1 id="currentColumnY">
- 正答：<input type="text" size=2 id="correctAnswer">
- 桁数：<input type="text" size=1 id="correctAnswerKeta">
+ Y: <input type="text" size=1 id="currentColumnY"><br>
+ 正解：<input type="text" size=2 id="correctAnswer">
+ 正解の桁数：<input type="text" size=1 id="correctAnswerKeta"><br>
  入力中の値：<input type="text" size=2 id="inputAnswer">
  列スコア：<input type="text" size=2 id="rowScore">
-
 </div>
 
 <br><br>
 <hr>
 (c) Nozomi<br>
-v1.4.2  2015/09/27  除算時、商を誤答したら、剰余をスキップ<br>
+v1.5  2015/09/27  ソフトウェアキーボードの表示<br>
 <!--
+v1.4.2  2015/09/27  除算時、商を誤答したら、剰余をスキップ<br>
 v1.4.1  2015/09/27  結果表示をalertからhtmlに変更<br>
 v1.4  2015/09/26  Perfect表示<br>
 v1.3  2015/09/26  除算対応<br>
