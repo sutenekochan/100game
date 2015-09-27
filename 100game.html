@@ -5,13 +5,11 @@
 
 <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script-->
 <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
-<!--script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script-->
-<!--script type="text/javascript" src="jquery-1.11.3.min.js"></script-->
 
 
 <!-- デバッグ用 -->
 <style type="text/css">
-  .controller {   display:none /**/ }  /* デバッグ用情報を表示 */
+  .controller {   display:none /**/ }  /* コメント化するとデバッグ用情報を表示 */
 </style>
 <script type="text/javascript">
   var startX = 1;  // この座標のマスから始める
@@ -21,7 +19,7 @@
 
 <!-- ここからメイン -->
 <style type="text/css">
-  .sheet { background: #eee }                 /* 表全体 */
+  .sheet { background: #eee }                /* 表全体 */
   .currentColumn { background: #ffa }        /* フォーカスのあるマス */
   .currentColumnHeader {                     /* フォーカスのある行・列 */
      background: #cff;
@@ -36,101 +34,6 @@
     display: none
   }
 </style>
-
-</head>
-
-<body onload="main()">
-
-<font size="+2" style="text-decoration:underline">みんなの100ます計算(ゲームバージョン)</font><br>
-<br>
-　　<select name="calcType" id="calcType">
-<option value="add_1_1">足し算 (１けた)
-<option value="add_2_1">足し算 (２けた＋１けた)
-<option value="add_1_2">足し算 (１けた＋２けた)
-<option value="add_2s_2s">足し算 (１９までの２けた)
-<option value="add_2_2">足し算 (２けた)
-<option value="sub_2_1">引き算 (２けた－１けた)
-<option value="mul_1_1">掛け算 (１けた)
-</select>
-　<button id="startButton" onclick="main()">はじめから</button>
-　　スコア <input type="text" size=2 id="score">
- （ <select name="passScore" id="passScore">
-<option value="100">100
-<option value="98">98
-<option value="95" selected>95
-<option value="90">90
-<option value="1">1
-</select> 点でクリア）
-　音<input type="checkbox" id="soundEnabled" checked="checked">
-<br>
-<br>
-<!--
- 表。数字が書いてある列を含め11x11ある。
- 表全体の class が sheet
- 各カラムの id が、s のあとに、縦、横の順の数字 (0～a)。s00～saaまで
--->
-<div style="position: relative">
-<table border="1px" class="sheet" style="position: relative; top: 0px; ">
- <tr height=50px>
-  <th width=50px id="s00">  <th width=50px id="s10">1 <th width=50px id="s20">2 <th width=50px id="s30">3
-  <th width=50px id="s40">4 <th width=50px id="s50">5 <th width=50px id="s60">6 <th width=50px id="s70">7
-  <th width=50px id="s80">8 <th width=50px id="s90">9 <th width=50px id="sa0">10
-<tr height=50px>
- <th id="s01">1
- <td id="s11"> <td id="s21"> <td id="s31"> <td id="s41"> <td id="s51">
- <td id="s61"> <td id="s71"> <td id="s81"> <td id="s91"> <td id="sa1">
-<tr height=50px>
- <th id="s02">2
- <td id="s12"> <td id="s22"> <td id="s32"> <td id="s42"> <td id="s52">
- <td id="s62"> <td id="s72"> <td id="s82"> <td id="s92"> <td id="sa2">
-<tr height=50px>
- <th id="s03">3
- <td id="s13"> <td id="s23"> <td id="s33"> <td id="s43"> <td id="s53">
- <td id="s63"> <td id="s73"> <td id="s83"> <td id="s93"> <td id="sa3">
-<tr height=50px>
- <th id="s04">4
- <td id="s14"> <td id="s24"> <td id="s34"> <td id="s44"> <td id="s54">
- <td id="s64"> <td id="s74"> <td id="s84"> <td id="s94"> <td id="sa4">
-<tr height=50px>
- <th id="s05">5
- <td id="s15"> <td id="s25"> <td id="s35"> <td id="s45"> <td id="s55">
- <td id="s65"> <td id="s75"> <td id="s85"> <td id="s95"> <td id="sa5">
-<tr height=50px>
- <th id="s06">6
- <td id="s16"> <td id="s26"> <td id="s36"> <td id="s46"> <td id="s56">
- <td id="s66"> <td id="s76"> <td id="s86"> <td id="s96"> <td id="sa6">
-<tr height=50px>
- <th id="s07">7
- <td id="s17"> <td id="s27"> <td id="s37"> <td id="s47"> <td id="s57">
- <td id="s67"> <td id="s77"> <td id="s87"> <td id="s97"> <td id="sa7">
-<tr height=50px>
- <th id="s08">8
- <td id="s18"> <td id="s28"> <td id="s38"> <td id="s48"> <td id="s58">
- <td id="s68"> <td id="s78"> <td id="s88"> <td id="s98"> <td id="sa8">
-<tr height=50px>
- <th id="s09">9
- <td id="s19"> <td id="s29"> <td id="s39"> <td id="s49"> <td id="s59">
- <td id="s69"> <td id="s79"> <td id="s89"> <td id="s99"> <td id="sa9">
-<tr height=50px>
- <th id="s0a">10
- <td id="s1a"> <td id="s2a"> <td id="s3a"> <td id="s4a"> <td id="s5a">
- <td id="s6a"> <td id="s7a"> <td id="s8a"> <td id="s9a"> <td id="saa">
-</table>
-<img src="complete.png" class="sheetComplete" id="sheetComplete" style="position: absolute; top: 0px; ">
-</div>
-
-<br>
-タブレットなら、ここをタップ。キーボードが出ます → <input type="number" id="keyboardEnabler" style="ime-mode: disabled; width: 50px" pattern="\d*">
-
-<br>
-<div  class="controller"><!-- ここはリリース時には表示されない部分 -->
- タイプ：<input type="text" size=4 id="calcTypeStr">
- X: <input type="text" size=1 id="currentColumnX">
- Y: <input type="text" size=1 id="currentColumnY">
- 正答：<input type="text" size=2 id="correctAnswer">
- 桁数：<input type="text" size=1 id="correctAnswerKeta">
- 入力中の値：<input type="text" size=2 id="inputAnswer">
-</div>
 
 <script type="text/javascript">
 
@@ -148,17 +51,22 @@ var soundWrong = new Audio("Quiz-Wrong_Buzzer02-1.mp3");      // 不正解
 var soundWrongPlayed = 0;
 var soundClear = new Audio("Quiz-Results02-1.mp3");           // 合格
 var soundClearPlayed = 0;
-var soundGameOver = new Audio("Phrase04-1.mp3");        // 不合格
+var soundGameOver = new Audio("Phrase04-1.mp3");              // 不合格
 var soundGameOverPlayed = 0;
 
 
 // --------------------------------------------------
-function makeColumnName(x, y)
+function makeColumnName(x, y, flag)
   // #s12 とかの名前を作る
+  // 3つめの引数を指定すると # をつけなくなる (s12とかなる)
 {
   var xx = x;  if(xx == 10) { xx = "a"; }
   var yy = y;  if(yy == 10) { yy = "a"; }
-  var columnName  = "#s" +  xx  + yy;
+  var columnName  = "s" +  xx  + yy;
+  if(typeof flag === "undefined")
+  {
+    columnName = "#" + columnName;
+  }
   return columnName;
 }
 
@@ -214,32 +122,12 @@ function randN(min, max, prev)
 
 
 // --------------------------------------------------
-function remakeSub(min, max, prev, x, y)
-  // 内部関数。1マス作成し column に書き込む
-  // min,max,prev : 乱数作成用の値。最小値、最大値、前の値
-  // x,y : 書き込む column の位置
-  // 戻り値 : 作成した乱数の値 (次の i に使用)
-{
-  var r = randN(min, max, prev);
-
-  var columnName = makeColumnName(x, y);
-  $(columnName).text(r);
-
-  return r;
-}
-
-
-// --------------------------------------------------
 function remake()
   // 表の再作成。ページロード・ボタン押下で呼ばれる
 {
   var calcType = $("#calcType").val();
 
-  var minX=1;  // 念のためのデフォルト値
-  var maxX=9;
-  var minY=1;
-  var maxY=9;
-  var typestr="";
+  var minX=1, maxX=9, minY=1, maxY=9, typestr="", divflag=0;  // 念のためのデフォルト値をセット
 
   if     (calcType == "add_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="足しざん";  }
   else if(calcType == "add_2_1")   { minX=10;  maxX=99;  minY=1;   maxY=9;   typestr="足しざん";  }
@@ -248,23 +136,88 @@ function remake()
   else if(calcType == "add_2_2")   { minX=10;  maxX=99;  minY=10;  maxY=99;  typestr="足しざん";  }
   else if(calcType == "sub_2_1")   { minX=10;  maxX=19;  minY=1;   maxY=9;   typestr="引きざん";  }
   else if(calcType == "mul_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="かけざん";  }
-  else                             { alert("プログラムのどこかにミスがある模様"); }
+  else if(calcType == "div_2_1")   { minX=10;  maxX=99;  minY=2;   maxY=9;   typestr="わりざん";  divflag=1;  }
+  else                             { alert("プログラムのどこかにミスがある模様(r)");  return;  }
 
   $("#calcTypeStr").val(typestr);
 
-  // 上の数字を作る
-  var r = 0;
-  for(var x = 1; x<=10; x++)
+
+
+  // table タグを生成。割り算時にはテーブル構成が変わるので表自体を動的生成する
+  var sheetstr = "";
+  sheetstr += '<table border="1px" class="sheet" style="position: relative; top: 0px;">' + "\n";
+
+
+  // 1列目 (数値が書かれている列)
+  sheetstr += '<tr height=50px><th width=50px id="s00">';
+  var x1=0, x2;
+  for(var cols=0; cols<10; cols++) {
+    var columnName = makeColumnName(cols+1, 0, 1);
+    x2 = randN(minX, maxX, x1);
+    sheetstr += '<th width=50px id="' + columnName + '">' + x2;
+    x1 = x2;
+  }
+  sheetstr += "\n";
+
+  // 2列目以降 (除算以外)
+  if(divflag == 0)
   {
-    r = remakeSub (minX, maxX, r, x, 0);
+    var y1 = 0;
+    var y2;
+
+    for(var rows=0; rows<10; rows++)
+    {
+      var columnName = makeColumnName(0, rows+1, 1);
+      y2 = randN(minY,maxY,y1);
+      sheetstr += '<tr height=50px>';
+      sheetstr += '<th id="' + columnName + '">' + y2;
+      y1 = y2;
+      for(var cols=0; cols<10; cols++) {
+        columnName = makeColumnName(cols+1, rows+1, 1);
+        sheetstr += '<td id="' + columnName + '">';
+      }
+      sheetstr += "\n";
+    }
   }
 
-  // 横の数字を作る
-  r = 0;
-  for(var y = 1; y<=10; y++)
+
+  // 縦の列2列目以降 (除算)
+  else    // divflag == 0
   {
-    r = remakeSub (minY, maxY, r, 0, y);
+    var y1 = 0;
+    var y2;
+
+    for(var rows=0; rows<5; rows++)
+    {
+      var columnName = makeColumnName(0, rows*2+1, 1);
+      y2 = randN(minY,maxY,y1);
+      sheetstr += '<tr height=40px>';
+      sheetstr += '<th rowspan=3 id="' + columnName + '">' + y2;
+      y1 = y2;
+      for(var cols=0; cols<10; cols++) {
+        columnName = makeColumnName(cols+1, rows*2+1, 1);
+        sheetstr += '<td style="border-bottom: 0px" id="' + columnName + '">';
+      }
+      sheetstr += '<tr height=20px>';
+      for(var cols=0; cols<10; cols++) {
+        sheetstr += '<td style="border-top: 0px; border-bottom: 0px"><font size="-3">　あまり</font>';
+      }
+      sheetstr += '<tr height=40px>';
+      for(var cols=0; cols<10; cols++) {
+        columnName = makeColumnName(cols+1, rows*2+2, 1);
+        sheetstr += '<td style="border-top: 0px" id="' + columnName + '">';
+      }
+    }
   }
+
+
+  sheetstr += '<table>';
+
+  // HTMLに書き込み
+  document.getElementById("sheet").innerHTML = sheetstr;
+
+  // tableタグの作成ここまで
+
 
   // すべての表示色・表示内容をリセット
   for(var x = 1; x<=10; x++)
@@ -288,10 +241,16 @@ function remake()
 
 // --------------------------------------------------
 function calcKeta(n)
-  // nの桁数を求める
+  // nの桁数を求める。nは正の値であること
 {
   var i = 1;
   var ii = 1;
+
+  // 0の場合だけ特別扱い
+  if(n==0)
+  {
+    return 1;
+  }
 
   for(;;)
   {
@@ -309,6 +268,8 @@ function gotoXY(x,y)
   // 昔の場所の色を消し、新しい場所に色を付ける
   // 正答を計算する
 {
+  var calcType = $("#calcTypeStr").val();
+
   var oldX = $("#currentColumnX").val();
   var oldY = $("#currentColumnY").val();
   unfocusColumn(oldX, oldY);
@@ -321,15 +282,19 @@ function gotoXY(x,y)
   var columnNameX = makeColumnName(x, 0);
   var valueX = $(columnNameX).text();
 
-  var columnNameY = makeColumnName(0, y);
+  // 除算の剰余を求める場合、Yの位置がずれる
+  var yy = y;
+  if(calcType == "わりざん" && y%2 == 0) { yy--; }
+  var columnNameY = makeColumnName(0, yy);
   var valueY = $(columnNameY).text();
 
   var answer;
-  var calcType = $("#calcTypeStr").val();
   if     (calcType == "足しざん") { answer = parseInt(valueX) + parseInt(valueY); }
   else if(calcType == "引きざん") { answer = valueX - valueY; }
   else if(calcType == "かけざん") { answer = valueX * valueY; }
-  else                            { alert("プログラムのどこかにミスがある模様"); }
+  else if(calcType == "わりざん" && y%2 == 1) { answer = Math.floor(valueX / valueY); }
+  else if(calcType == "わりざん") { answer = valueX % valueY; }
+  else                            { alert("プログラムのどこかにミスがある模様(g)"); return; }
   $("#correctAnswer").val(answer);
 
   var keta = calcKeta(answer);
@@ -451,9 +416,12 @@ function inputandCheckAnswer(n)
     startTime = new Date();
   }
 
+  var correctAnswer = $("#correctAnswer").val();
+  var correctAnswerKeta = $("#correctAnswerKeta").val();
+
   var inputAnswer = $("#inputAnswer").val();  // columnName を直接扱うと、空白文字のせいで誤動作する
 
-  if(inputAnswer == "" && n == 0)  // 最初の文字が0
+  if(inputAnswer == "" && n == 0 && correctAnswer != 0)  // 最初の文字が0、かつ、正解が0でない
   {
     return;
   }
@@ -474,7 +442,8 @@ function inputandCheckAnswer(n)
   }
   else
   {
-    alert("プログラムのどこかにミスがある模様");
+    alert("プログラムのどこかにミスがある模様(i)");
+    return;
   }
 
   $("#inputAnswer").val(inputAnswer);
@@ -490,8 +459,6 @@ function inputandCheckAnswer(n)
     return;
   }
 
-  var correctAnswer = $("#correctAnswer").val();
-  var correctAnswerKeta = $("#correctAnswerKeta").val();
   var inputAnswerKeta = calcKeta(inputAnswer);
 
   if(correctAnswer == inputAnswer)  // 正解
@@ -523,22 +490,57 @@ function gotoNext()
 {
   var x = $("#currentColumnX").val();
   var y = $("#currentColumnY").val();
+  var calcType = $("#calcTypeStr").val();
 
-  x++;
-  if(x==11)
+  if(calcType != "わりざん")
   {
-    x=1;
-    y++;
+    // 除算以外：右のマスへ移動
+    x++;
+    if(x==11)
+    {
+      x=1;
+      y++;
+    }
+
+    if(y==11)
+    {
+      finishAllColumn();
+    }
+    else
+    {
+      gotoXY(x,y);
+    }
   }
 
-  if(y==11)
-  {
-    finishAllColumn();
-  }
   else
   {
-    gotoXY(x,y);
+    // 除算の場合
+    if(y%2 == 1)  // 商入力中 → 剰余入力へ
+    {
+      y++;
+      gotoXY(x,y);
+    }
+    else  // 剰余入力中 → 次のマスへ
+    {
+      x++;
+      y--;
+      if(x==11)
+      {
+        x=1;
+        y+=2;
+      }
+
+      if(y==11)
+      {
+        finishAllColumn();
+      }
+      else
+      {
+        gotoXY(x,y);
+      }
+    }
   }
+
 }
 
 
@@ -582,11 +584,60 @@ function main()
 // --------------------------------------------------
 </script>
 
+
+</head>
+
+<body onload="main()">
+
+<font size="+2" style="text-decoration:underline">みんなの100ます計算(ゲームバージョン)</font><br>
+<br>
+　　<select name="calcType" id="calcType">
+<option value="add_1_1">足し算 (１けた)
+<option value="add_2_1">足し算 (２けた＋１けた)
+<option value="add_1_2">足し算 (１けた＋２けた)
+<option value="add_2s_2s">足し算 (１９までの２けた)
+<option value="add_2_2">足し算 (２けた)
+<option value="sub_2_1">引き算 (２けた－１けた)
+<option value="mul_1_1">かけ算 (１けた)
+<option value="div_2_1">わり算 (２けた÷１けた)
+</select>
+　<button id="startButton" onclick="main()">はじめから</button>
+　　スコア <input type="text" size=2 id="score">
+ （ <select name="passScore" id="passScore">
+<option value="100">100
+<option value="98">98
+<option value="95" selected>95
+<option value="90">90
+<option value="1">1
+</select> 点でクリア）
+　音<input type="checkbox" id="soundEnabled" checked="checked">
+<br>
+<br>
+
+<div style="position: relative">
+  <div id="sheet"></div><!-- 表はここに動的生成される。表全体の class が sheet。カラムの id が、s のあとに、縦、横の順の数字 (0～a)。s00～saaまで -->
+  <img src="complete.png" class="sheetComplete" id="sheetComplete" style="position: absolute; top: 0px; "><!-- はなまる画像 -->
+</div>
+
+<br>
+タブレットなら、ここをタップ。キーボードが出ます → <input type="number" id="keyboardEnabler" style="ime-mode: disabled; width: 50px" pattern="\d*">
+
+<br>
+<div  class="controller"><!-- ここはリリース時には表示されない部分 -->
+ タイプ：<input type="text" size=4 id="calcTypeStr">
+ X: <input type="text" size=1 id="currentColumnX">
+ Y: <input type="text" size=1 id="currentColumnY">
+ 正答：<input type="text" size=2 id="correctAnswer">
+ 桁数：<input type="text" size=1 id="correctAnswerKeta">
+ 入力中の値：<input type="text" size=2 id="inputAnswer">
+</div>
+
 <br><br>
 <hr>
 (c) Nozomi<br>
-v1.2.1  2015/07/30  合格・不合格での音追加<br>
+v1.3  2015/09/26  除算対応<br>
 <!--
+v1.2.1  2015/07/30  合格・不合格での音追加<br>
 v1.2  2015/07/25  合格点のときにはなまるを表示 (標準では95点で合格)・タブレットとりあえず対応 (スマホでも動くけど画面小さすぎ)<br>
 v1.1  2015/07/23  効果音と「Ｘ」画像を追加<br>
 v1.0  2015/07/22  1st ver.<br>
