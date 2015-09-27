@@ -2,6 +2,8 @@
 <html>
 <head>
 <meta charset="utf-8">
+<!-- メモ：旧バージョンを保存すること -->
+
 
 <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script-->
 <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
@@ -9,7 +11,7 @@
 
 <!-- デバッグ用 -------------------------------------------------- -->
 <style type="text/css">
-  .controller {  display:none /**/ }  /* コメント化するとデバッグ用情報を表示 */
+  .controller { display:none /**/ }  /* コメント化するとデバッグ用情報を表示 */
 </style>
 <script type="text/javascript">
   var startX = 1;  // この座標のマスから始める
@@ -542,7 +544,7 @@ function inputandCheckAnswer(n)
   {
     $(columnName).addClass("wrongColumn");
     playSound(2);
-    gotoNext();
+    gotoNext(1);
   }
 
   else                                                  // 入力桁数が正答桁数に満たない
@@ -555,8 +557,10 @@ function inputandCheckAnswer(n)
 
 
 // --------------------------------------------------
-function gotoNext()
+function gotoNext(skipFlag)
   // 次のマスへ移動
+  // 引数は誤答の場合に指定
+  // 誤答、かつ、除算で商の入力中には、剰余の入力をスキップ。除算以外の場合は普通に次のマスへ
 {
   var x = $("#currentColumnX").val();
   var y = $("#currentColumnY").val();
@@ -583,10 +587,32 @@ function gotoNext()
     }
   }
 
-  else if(y%2 == 1)                                    // 除算で、商入力中 → 剰余入力へ (1個下へ)
+  else if(y%2 == 1 && typeof skipFlag === "undefined")  // 除算で、商入力中 → 剰余入力へ (1個下へ)
   {
     y++;
     gotoXY(x,y);
+  }
+
+  else if(y%2 == 1)                                     // 除算で、商を誤答 → 次のマスへ
+  {
+    x++;
+    if(x==11)
+    {
+      finishRow(y);
+      x=1;
+      y++;    //メモ：y+=2と書いたら文字列連結になったので++を2回書いている
+      y++;
+    }
+
+    if(y==11)
+    {
+      finishRow(y);
+      finishAllColumn();
+    }
+    else
+    {
+      gotoXY(x,y);
+    }
   }
 
   else                                                 // 剰余入力中 → 次のマスへ
@@ -597,7 +623,8 @@ function gotoNext()
     {
       finishRow(y);
       x=1;
-      y+=2;
+      y++;
+      y++;
     }
 
     if(y==11)
@@ -626,7 +653,13 @@ function finishRow(y)
   {
 
     var columnName = makeColumnName(11, y);          // perfect文字書き込み
-    $(columnName).text("Perfect");
+
+    var r = randN(1,5,0);
+    if     (r == 1) {  $(columnName).text(" Perfect");  }
+    else if(r == 2) {  $(columnName).text(" Excelent");  }
+    else if(r == 3) {  $(columnName).text(" Fantastic");  }
+    else if(r == 4) {  $(columnName).text(" Cool");  }
+    else            {  $(columnName).text(" Good Job");  }
   }
 
   $("#rowScore").val(0);                             // 列スコアをリセット
@@ -729,8 +762,9 @@ function main()
 <br><br>
 <hr>
 (c) Nozomi<br>
-v1.4.1  2015/09/27  結果表示をalertからhtmlに変更<br>
+v1.4.2  2015/09/27  除算時、商を誤答したら、剰余をスキップ<br>
 <!--
+v1.4.1  2015/09/27  結果表示をalertからhtmlに変更<br>
 v1.4  2015/09/26  Perfect表示<br>
 v1.3  2015/09/26  除算対応<br>
 v1.2.1  2015/07/30  合格・不合格での音追加<br>
