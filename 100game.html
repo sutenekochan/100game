@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<!--script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script-->
+<script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+<!--script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script-->
+<!--script type="text/javascript" src="jquery-1.11.3.min.js"></script-->
+
+<style type="text/css">
+  .sheet { background: #eee }                /* 表全体 */
+  .currentColumn { background: #ffa }        /* フォーカスのあるマス */
+  .currentColumnHeader {                     /* フォーカスのある行・列 */
+     background: #cff;
+     color: #f00
+  }
+  .correctColumn { background: #ddd }
+  .wrongColumn { background: #fee }
+
+
+  .controller {  display:none /**/ }               /* 内部制御用。debug中は表示、リリース時に隠す */
+
+</style>
+
+</head>
+
+<body onload="main()">
+
+<font size="+2" style="text-decoration:underline">みんなの100ます計算(ゲーム版)</font><br>
+<br>
+　　　　<select name="calcType" id="calcType">
+<option value="add_1_1">足し算 (１桁＋１桁)
+<option value="add_2_1">足し算 (２桁＋１桁)
+<option value="add_2s_2s">足し算 (２桁＋２桁。数字は19まで)
+<option value="add_2_2">足し算 (２桁＋２桁)
+<option value="sub_2_1">引き算 (２桁－１桁)
+<option value="mul_1_1">掛け算 (１桁×１桁)
+</select>
+　　<button id="startButton" onclick="main()">最初から</button>
+　　得点：<input type="text" size=2 id="score">
+<br>
+<br>
+<!--
+ 表。数字が書いてある列を含め11x11ある。
+ 表全体の class が sheet
+ 各カラムの id が、s のあとに、縦、横の順の数字 (0～a)。s00～saaまで
+-->
+<table border="1px" class="sheet">
+ <tr height=50px>
+  <th width=50px id="s00">  <th width=50px id="s10">1 <th width=50px id="s20">2 <th width=50px id="s30">3
+  <th width=50px id="s40">4 <th width=50px id="s50">5 <th width=50px id="s60">6 <th width=50px id="s70">7
+  <th width=50px id="s80">8 <th width=50px id="s90">9 <th width=50px id="sa0">10
+<tr height=50px>
+ <th id="s01">1
+ <td id="s11"> <td id="s21"> <td id="s31"> <td id="s41"> <td id="s51">
+ <td id="s61"> <td id="s71"> <td id="s81"> <td id="s91"> <td id="sa1">
+<tr height=50px>
+ <th id="s02">2
+ <td id="s12"> <td id="s22"> <td id="s32"> <td id="s42"> <td id="s52">
+ <td id="s62"> <td id="s72"> <td id="s82"> <td id="s92"> <td id="sa2">
+<tr height=50px>
+ <th id="s03">3
+ <td id="s13"> <td id="s23"> <td id="s33"> <td id="s43"> <td id="s53">
+ <td id="s63"> <td id="s73"> <td id="s83"> <td id="s93"> <td id="sa3">
+<tr height=50px>
+ <th id="s04">4
+ <td id="s14"> <td id="s24"> <td id="s34"> <td id="s44"> <td id="s54">
+ <td id="s64"> <td id="s74"> <td id="s84"> <td id="s94"> <td id="sa4">
+<tr height=50px>
+ <th id="s05">5
+ <td id="s15"> <td id="s25"> <td id="s35"> <td id="s45"> <td id="s55">
+ <td id="s65"> <td id="s75"> <td id="s85"> <td id="s95"> <td id="sa5">
+<tr height=50px>
+ <th id="s06">6
+ <td id="s16"> <td id="s26"> <td id="s36"> <td id="s46"> <td id="s56">
+ <td id="s66"> <td id="s76"> <td id="s86"> <td id="s96"> <td id="sa6">
+<tr height=50px>
+ <th id="s07">7
+ <td id="s17"> <td id="s27"> <td id="s37"> <td id="s47"> <td id="s57">
+ <td id="s67"> <td id="s77"> <td id="s87"> <td id="s97"> <td id="sa7">
+<tr height=50px>
+ <th id="s08">8
+ <td id="s18"> <td id="s28"> <td id="s38"> <td id="s48"> <td id="s58">
+ <td id="s68"> <td id="s78"> <td id="s88"> <td id="s98"> <td id="sa8">
+<tr height=50px>
+ <th id="s09">9
+ <td id="s19"> <td id="s29"> <td id="s39"> <td id="s49"> <td id="s59">
+ <td id="s69"> <td id="s79"> <td id="s89"> <td id="s99"> <td id="sa9">
+<tr height=50px>
+ <th id="s0a">10
+ <td id="s1a"> <td id="s2a"> <td id="s3a"> <td id="s4a"> <td id="s5a">
+ <td id="s6a"> <td id="s7a"> <td id="s8a"> <td id="s9a"> <td id="saa">
+</table>
+
+<div  class="controller"><!-- ここはリリース時には表示されない部分 -->
+ タイプ：<input type="text" size=4 id="calcTypeStr">
+ X: <input type="text" size=1 id="currentColumnX">
+ Y: <input type="text" size=1 id="currentColumnY">
+ 正答：<input type="text" size=2 id="correctAnswer">
+ 桁数：<input type="text" size=1 id="correctAnswerKeta">
+ 入力中の値：<input type="text" size=2 id="inputAnswer">
+</div>
+
+<script type="text/javascript">
+
+// --------------------------------------------------
+// グローバル変数
+var startTime = 0;
+
+// --------------------------------------------------
+function makeColumnName(x, y)
+  // #s12 とかの名前を作る
+{
+  var xx = x;  if(xx == 10) { xx = "a"; }
+  var yy = y;  if(yy == 10) { yy = "a"; }
+  var columnName  = "#s" +  xx  + yy;
+  return columnName;
+}
+
+
+// --------------------------------------------------
+function focusColumnSub (x, y, a)
+  // 内部関数。座標(x,y)の色を付けたり消したり。CSSクラスの追加削除を行う
+  // x,y：座標。1～10の数字であること (引数チェックはしていない)
+  // a: 1なら追加、2なら削除
+{
+  var columnName  = makeColumnName(x, y);
+  var columnNameX = makeColumnName(x, 0);
+  var columnNameY = makeColumnName(0, y);
+
+  if(a == 1)
+  {
+    $(function(){
+      $(columnName).addClass("currentColumn")
+      $(columnNameX).addClass("currentColumnHeader")
+      $(columnNameY).addClass("currentColumnHeader")
+    });
+  } else {
+    $(function(){
+      $(columnName).removeClass("currentColumn")
+      $(columnNameX).removeClass("currentColumnHeader")
+      $(columnNameY).removeClass("currentColumnHeader")
+    });
+  }
+};
+
+
+// --------------------------------------------------
+  // 座標(x,y)の色を付ける/消す。x,y は1～10の数字
+function focusColumn (x, y) { focusColumnSub (x, y, 1) };
+function unfocusColumn (x, y) { focusColumnSub (x, y, 2) };
+
+
+// --------------------------------------------------
+function randN(min, max, prev)
+  // 最小値～最大値の範囲で乱数を返す
+  // 前回の値を指定することで、前回の値と違う値を返す (同じ数字が連続しない機能)
+  // 引数：乱数の最小値、最大値、前回の値
+{
+  for(;;)
+  {
+    var x = Math.floor(Math.random() * (max-min+1)) + min;
+    if(x != prev)
+    {
+      return x;
+    }
+  }
+}
+
+
+// --------------------------------------------------
+function remakeSub(min, max, prev, x, y)
+  // 内部関数。1マス作成し column に書き込む
+  // min,max,prev : 乱数作成用の値。最小値、最大値、前の値
+  // x,y : 書き込む column の位置
+  // 戻り値 : 作成した乱数の値 (次の i に使用)
+{
+  var r = randN(min, max, prev);
+
+  var columnName = makeColumnName(x, y);
+  $(columnName).text(r);
+
+  return r;
+}
+
+
+// --------------------------------------------------
+function remake()
+  // 表の再作成。ページロード・ボタン押下で呼ばれる
+{
+  var calcType = $("#calcType").val();
+
+  var minX=1;  // 念のためのデフォルト値
+  var maxX=9;
+  var minY=1;
+  var maxY=9;
+  var typestr="";
+
+  if     (calcType == "add_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="足しざん";  }
+  else if(calcType == "add_2_1")   { minX=10;  maxX=99;  minY=1;   maxY=9;   typestr="足しざん";  }
+  else if(calcType == "add_2s_2s") { minX=10;  maxX=19;  minY=10;  maxY=19;  typestr="足しざん";  }
+  else if(calcType == "add_2_2")   { minX=10;  maxX=99;  minY=10;  maxY=99;  typestr="足しざん";  }
+  else if(calcType == "sub_2_1")   { minX=10;  maxX=19;  minY=1;   maxY=9;   typestr="引きざん";  }
+  else if(calcType == "mul_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="かけざん";  }
+  else                             { alert("プログラムのどこかにミスがある模様"); }
+
+  $("#calcTypeStr").val(typestr);
+
+  // 上の数字を作る
+  var r = 0;
+  for(var x = 1; x<=10; x++)
+  {
+    r = remakeSub (minX, maxX, r, x, 0);
+  }
+
+  // 横の数字を作る
+  r = 0;
+  for(var y = 1; y<=10; y++)
+  {
+    r = remakeSub (minY, maxY, r, 0, y);
+  }
+
+  // すべての表示色・表示内容をリセット
+  for(var x = 1; x<=10; x++)
+  {
+    for(var y = 1; y<=10; y++)
+    {
+      var columnName = makeColumnName(x, y);
+
+      $(columnName).text("");
+      $(columnName).removeClass("correctColumn");
+      $(columnName).removeClass("wrongColumn");
+    }
+  }
+
+  // 各種値をリセット
+  $("#score").val(0);
+  startTime = 0;
+}
+
+
+// --------------------------------------------------
+function calcKeta(n)
+  // nの桁数を求める
+{
+  var i = 1;
+  var ii = 1;
+
+  for(;;)
+  {
+    if(ii <= n && n < ii*10) { return i; }
+    i++;
+    ii *= 10;
+  }
+}
+
+
+
+// --------------------------------------------------
+function gotoXY(x,y)
+  // (x,y) の座標に進む
+  // 昔の場所の色を消し、新しい場所に色を付ける
+  // 正答を計算する
+{
+  var oldX = $("#currentColumnX").val();
+  var oldY = $("#currentColumnY").val();
+  unfocusColumn(oldX, oldY);
+
+  $("#currentColumnX").val(x);
+  $("#currentColumnY").val(y);
+
+  focusColumn(x,y);
+
+  var columnNameX = makeColumnName(x, 0);
+  var valueX = $(columnNameX).text();
+
+  var columnNameY = makeColumnName(0, y);
+  var valueY = $(columnNameY).text();
+
+  var answer;
+  var calcType = $("#calcTypeStr").val();
+  if     (calcType == "足しざん") { answer = parseInt(valueX) + parseInt(valueY); }
+  else if(calcType == "引きざん") { answer = valueX - valueY; }
+  else if(calcType == "かけざん") { answer = valueX * valueY; }
+  else                            { alert("プログラムのどこかにミスがある模様"); }
+  $("#correctAnswer").val(answer);
+
+  var keta = calcKeta(answer);
+  $("#correctAnswerKeta").val(keta);
+
+  $("#inputAnswer").val("");
+}
+
+
+// --------------------------------------------------
+$(window).keydown(function(e)
+  // キー入力をトラップ。数字キーを処理する
+{
+  var k = e.keyCode;
+  var n = -1;
+  if     (k==96  || k==48) {  n=0;   }  // テンキー「0」と通常キー「0」。以下同じ
+  else if(k==97  || k==49) {  n=1;   }
+  else if(k==98  || k==50) {  n=2;   }
+  else if(k==99  || k==51) {  n=3;   }
+  else if(k==100 || k==52) {  n=4;   }
+  else if(k==101 || k==53) {  n=5;   }
+  else if(k==102 || k==54) {  n=6;   }
+  else if(k==103 || k==55) {  n=7;   }
+  else if(k==104 || k==56) {  n=8;   }
+  else if(k==105 || k==57) {  n=9;   }
+  else if(k==8   || k==46) {  n=10;  }  // 「BS」「DEL」
+
+  if(n != -1)
+  {
+    e.preventDefault();
+
+    inputandCheckAnswer(n);
+  }
+
+ return true;
+});
+
+
+// --------------------------------------------------
+function inputandCheckAnswer(n)
+  // 値を入力、入力された値を確認
+  // n：0～9＝数字、10＝BS
+{
+  // 開始時間をセット
+  if(startTime == 0)
+  {
+    startTime = new Date();
+  }
+
+  var inputAnswer = $("#inputAnswer").val();  // columnName を直接扱うと、空白文字のせいで誤動作する
+
+  if(inputAnswer == "" && n == 0)  // 最初の文字が0
+  {
+    return;
+  }
+
+  if(inputAnswer == "" && n == 10)  // BS・DELで既入力なし
+  {
+    return;
+  }
+
+  if(0 <= n && n <= 9)
+  {
+    inputAnswer += n;
+  }
+  else if(n == 10)  // BS・DEL
+  {
+    inputAnswer = Math.floor(inputAnswer / 10);
+    if(inputAnswer == 0) { inputAnswer = ""; }
+  }
+  else
+  {
+    alert("プログラムのどこかにミスがある模様");
+  }
+
+  $("#inputAnswer").val(inputAnswer);
+  
+  var x = $("#currentColumnX").val();
+  var y = $("#currentColumnY").val();
+  var columnName = makeColumnName(x, y);
+  $(columnName).text(inputAnswer);
+
+  // BS・DELの結果、inputAnswer が "" になってしまった場合に、帰る
+  if(inputAnswer == "")
+  {
+    return;
+  }
+
+  var correctAnswer = $("#correctAnswer").val();
+  var correctAnswerKeta = $("#correctAnswerKeta").val();
+  var inputAnswerKeta = calcKeta(inputAnswer);
+
+  if(correctAnswer == inputAnswer)  // 正解
+  {
+    $(columnName).addClass("correctColumn");
+    var score = $("#score").val();
+    score++;
+    $("#score").val(score);
+    gotoNext();
+  }
+  else if(correctAnswerKeta <= inputAnswerKeta)  // 入力桁数と正答桁数が同じ、かつ、不正解(不正解確定)
+  {
+    $(columnName).addClass("wrongColumn");
+    gotoNext();
+  }
+  else  // 入力桁数が正答桁数に満たない
+  {
+    return;
+  }
+
+}
+
+
+// --------------------------------------------------
+function gotoNext()
+  // 次のマスへ移動
+{
+  var x = $("#currentColumnX").val();
+  var y = $("#currentColumnY").val();
+
+  x++;
+  if(x==11)
+  {
+    x=1;
+    y++;
+  }
+
+  if(y==11)
+  {
+    finishAllColumn();
+  }
+  else
+  {
+    gotoXY(x,y);
+  }
+}
+
+
+// --------------------------------------------------
+function finishAllColumn()
+{
+  var score = $("#score").val();
+
+  var endTime = new Date();
+  var s = endTime - startTime;  // ミリ秒
+  s = Math.floor((s + 999)/1000);
+  m = Math.floor (s / 60);
+  s -= (m * 60);
+
+  alert("結果：" + score + "点。所要時間：" + m + "分" + s + "秒。お疲れ様でした");
+}
+
+
+// --------------------------------------------------
+function main()
+{
+  remake();
+  gotoXY(1,1);
+  $("#startButton").blur();  // 「最初から」ボタンを押した後に、スペースキー等入力によるご動作を防ぐ
+}
+
+// --------------------------------------------------
+</script>
+
+<br><br>
+<hr>
+(c) Nozomi<br>
+v1.0  2015/07/22  1st ver.<br>
+
+</body>
+</html>
