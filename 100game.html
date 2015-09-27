@@ -172,8 +172,9 @@ function unfocusColumn (x, y) { focusColumnSub (x, y, 2) };
 
 
 // --------------------------------------------------
-function showSoftKey(x,y)
+function showSoftKey(x, y)
   // ソフトウェアキーボードの表示
+  // 引数：位置、ソフトキーボードに表示する文字列
 {
   var columnName  = makeColumnName(x, y);
 
@@ -191,6 +192,17 @@ function showSoftKey(x,y)
     left -= 20;
   }
 
+
+  var calcStr = $("#currentQuestionX").val();             // 問の表示
+  var calcType = $("#calcTypeStr").val();
+  if     (calcType == "足しざん") {  calcStr += " ＋ ";  }
+  else if(calcType == "引きざん") {  calcStr += " － ";  }
+  else if(calcType == "かけざん") {  calcStr += " × ";  }
+  else if(calcType == "わりざん") {  calcStr += " ÷ ";  }
+  else                            {  alert("プログラムのどこかにミスがある模様(s)");  return;  }
+  calcStr += $("#currentQuestionY").val();
+  calcStr += " ＝？";
+  $("#softkeyQuestion").text(calcStr);
 
   $("#softkey").show();
   $("#softkey").css('top',  top);
@@ -210,13 +222,14 @@ function hideSoftKey()
 // --------------------------------------------------
 function showHideSoftKey()
   // softkeyEnabled の値にしたがって、ソフトウェアキーボードを表示したり消したりする
+  // 引数：ソフトキーボードに表示する文字列
 {
   var showFlag = $("#softkeyEnabled").prop("checked");
   if(showFlag)
   {
     var x = $("#currentColumnX").val();
     var y = $("#currentColumnY").val();
-    showSoftKey(x,y);
+    showSoftKey(x, y);
   }
   else
   {
@@ -256,6 +269,7 @@ function remake()
   else if(calcType == "add_1_2")   { minX=1;   maxX=9;   minY=10;  maxY=99;  typestr="足しざん";  }
   else if(calcType == "add_2s_2s") { minX=10;  maxX=19;  minY=10;  maxY=19;  typestr="足しざん";  }
   else if(calcType == "add_2_2")   { minX=10;  maxX=99;  minY=10;  maxY=99;  typestr="足しざん";  }
+  else if(calcType == "add_3_3")   { minX=100; maxX=999; minY=100; maxY=999; typestr="足しざん";  }
   else if(calcType == "sub_2_1")   { minX=10;  maxX=19;  minY=1;   maxY=9;   typestr="引きざん";  }
   else if(calcType == "mul_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="かけざん";  }
   else if(calcType == "div_2_1")   { minX=10;  maxX=99;  minY=2;   maxY=9;   typestr="わりざん";  }
@@ -417,15 +431,15 @@ function gotoXY(x,y)
   $("#currentColumnY").val(y);
   focusColumn(x,y);
 
-  showHideSoftKey();                         // ソフトウェアキーボードの表示
-
   var columnNameX = makeColumnName(x, 0);    // 上に書いてある数値
   var valueX = $(columnNameX).text();
+  $("#currentQuestionX").val(valueX);
 
   var yy = y;                                // 左に書いてある数値。除算の剰余を求める場合、Yの位置がずれる
   if(calcType == "わりざん" && y%2 == 0) { yy--; }
   var columnNameY = makeColumnName(0, yy);
   var valueY = $(columnNameY).text();
+  $("#currentQuestionY").val(valueY);
 
   var answer;                                // 解を求める
   if     (calcType == "足しざん") { answer = parseInt(valueX) + parseInt(valueY); }  // parseIntなしでは文字列の加算になる
@@ -440,6 +454,8 @@ function gotoXY(x,y)
   $("#correctAnswerKeta").val(keta);
 
   $("#inputAnswer").val("");                 // 入力中の値をクリア
+
+  showHideSoftKey();                         // ソフトウェアキーボードの表示
 }
 
 
@@ -806,6 +822,7 @@ function main()
 <option value="add_1_2">足し算 (１けた＋２けた)
 <option value="add_2s_2s">足し算 (１９までの２けた)
 <option value="add_2_2">足し算 (２けた)
+<option value="add_3_3">足し算 (３けた)
 <option value="sub_2_1">引き算 (２けた－１けた)
 <option value="mul_1_1">かけ算 (１けた)
 <option value="div_2_1">わり算 (２けた÷１けた)
@@ -826,6 +843,8 @@ function main()
 <!-- ソフトウェアキーボード -->
 <div id="softkey" class="softkey">
 <table>
+<tr>
+<td colspan=6 id="softkeyQuestion">
 <tr>
 <td onclick="inputandCheckAnswer(1)">1
 <td onclick="inputandCheckAnswer(2)">2
@@ -853,8 +872,10 @@ function main()
  </select> 点でクリア
  <br><br>
  タイプ：<input type="text" size=4 id="calcTypeStr">
- X: <input type="text" size=1 id="currentColumnX">
- Y: <input type="text" size=1 id="currentColumnY"><br>
+ 座標X: <input type="text" size=1 id="currentColumnX">
+ 座標Y: <input type="text" size=1 id="currentColumnY">
+ 数値1: <input type="text" size=1 id="currentQuestionX">
+ 数値2: <input type="text" size=1 id="currentQuestionY"><br>
  正解：<input type="text" size=2 id="correctAnswer">
  正解の桁数：<input type="text" size=1 id="correctAnswerKeta"><br>
  入力中の値：<input type="text" size=2 id="inputAnswer">
@@ -864,8 +885,9 @@ function main()
 <br><br>
 <hr>
 (c) Nozomi<br>
-v1.5  2015/09/27  ソフトウェアキーボードの表示<br>
+v1.5.1  2015/09/28  ソフトウェアキーボードに計算式を表示<br>
 <!--
+v1.5  2015/09/27  ソフトウェアキーボードの表示<br>
 v1.4.2  2015/09/27  除算時、商を誤答したら、剰余をスキップ<br>
 v1.4.1  2015/09/27  結果表示をalertからhtmlに変更<br>
 v1.4  2015/09/26  Perfect表示<br>
