@@ -21,7 +21,7 @@
 
 <!-- ここからメイン -->
 <style type="text/css">
-  .sheet { background: #eee }                /* 表全体 */
+  .sheet { background: #eee }                 /* 表全体 */
   .currentColumn { background: #ffa }        /* フォーカスのあるマス */
   .currentColumnHeader {                     /* フォーカスのある行・列 */
      background: #cff;
@@ -32,25 +32,35 @@
     background: #fdd;
     background-image: url("wrongAnswer.png")
   }
+  .sheetComplete {                           /* 全問正解のはなまる。最初は隠れている */
+    display: none
+  }
 </style>
 
 </head>
 
 <body onload="main()">
 
-<font size="+2" style="text-decoration:underline">みんなの100ます計算(ゲーム版)</font><br>
+<font size="+2" style="text-decoration:underline">みんなの100ます計算(ゲームバージョン)</font><br>
 <br>
-　　　　<select name="calcType" id="calcType">
-<option value="add_1_1">足し算 (１桁＋１桁)
-<option value="add_2_1">足し算 (２桁＋１桁)
-<option value="add_2s_2s">足し算 (２桁＋２桁。数字は19まで)
-<option value="add_2_2">足し算 (２桁＋２桁)
-<option value="sub_2_1">引き算 (２桁－１桁)
-<option value="mul_1_1">掛け算 (１桁×１桁)
+　　<select name="calcType" id="calcType">
+<option value="add_1_1">足し算 (１けた)
+<option value="add_2_1">足し算 (２けた＋１けた)
+<option value="add_1_2">足し算 (１けた＋２けた)
+<option value="add_2s_2s">足し算 (１９までの２けた)
+<option value="add_2_2">足し算 (２けた)
+<option value="sub_2_1">引き算 (２けた－１けた)
+<option value="mul_1_1">掛け算 (１けた)
 </select>
-　　<button id="startButton" onclick="main()">最初から</button>
-　　得点：<input type="text" size=2 id="score">
-　　音：<input type="checkbox" id="soundEnabled" checked="checked">
+　<button id="startButton" onclick="main()">はじめから</button>
+　　スコア <input type="text" size=2 id="score">
+ （ <select name="passScore" id="passScore">
+<option value="100">100
+<option value="95" selected>95
+<option value="90">90
+<option value="1">1
+</select> 点でクリア）
+　音<input type="checkbox" id="soundEnabled" checked="checked">
 <br>
 <br>
 <!--
@@ -58,7 +68,8 @@
  表全体の class が sheet
  各カラムの id が、s のあとに、縦、横の順の数字 (0～a)。s00～saaまで
 -->
-<table border="1px" class="sheet">
+<div style="position: relative">
+<table border="1px" class="sheet" style="position: relative; top: 0px; ">
  <tr height=50px>
   <th width=50px id="s00">  <th width=50px id="s10">1 <th width=50px id="s20">2 <th width=50px id="s30">3
   <th width=50px id="s40">4 <th width=50px id="s50">5 <th width=50px id="s60">6 <th width=50px id="s70">7
@@ -104,7 +115,13 @@
  <td id="s1a"> <td id="s2a"> <td id="s3a"> <td id="s4a"> <td id="s5a">
  <td id="s6a"> <td id="s7a"> <td id="s8a"> <td id="s9a"> <td id="saa">
 </table>
+<img src="complete.png" class="sheetComplete" id="sheetComplete" style="position: absolute; top: 0px; ">
+</div>
 
+<br>
+タブレットなら、ここをタップ。キーボードが出ます → <input type="number" id="keyboardEnabler" style="ime-mode: disabled; width: 50px" pattern="\d*">
+
+<br>
 <div  class="controller"><!-- ここはリリース時には表示されない部分 -->
  タイプ：<input type="text" size=4 id="calcTypeStr">
  X: <input type="text" size=1 id="currentColumnX">
@@ -221,6 +238,7 @@ function remake()
 
   if     (calcType == "add_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="足しざん";  }
   else if(calcType == "add_2_1")   { minX=10;  maxX=99;  minY=1;   maxY=9;   typestr="足しざん";  }
+  else if(calcType == "add_1_2")   { minX=1;   maxX=9;   minY=10;  maxY=99;  typestr="足しざん";  }
   else if(calcType == "add_2s_2s") { minX=10;  maxX=19;  minY=10;  maxY=19;  typestr="足しざん";  }
   else if(calcType == "add_2_2")   { minX=10;  maxX=99;  minY=10;  maxY=99;  typestr="足しざん";  }
   else if(calcType == "sub_2_1")   { minX=10;  maxX=19;  minY=1;   maxY=9;   typestr="引きざん";  }
@@ -259,6 +277,7 @@ function remake()
   // 各種値をリセット
   $("#score").val(0);
   startTime = 0;
+  $("#sheetComplete").hide();
 }
 
 
@@ -332,6 +351,13 @@ $(window).keydown(function(e)
   else if(k==104 || k==56) {  n=8;   }
   else if(k==105 || k==57) {  n=9;   }
   else if(k==8   || k==46) {  n=10;  }  // 「BS」「DEL」
+
+
+  if(window.navigator.userAgent.indexOf("Android") != -1)  // Android Chrome対応
+  {
+    $("#keyboardEnabler").blur();
+    $("#keyboardEnabler").focus();
+  }
 
   if(n != -1)
   {
@@ -496,7 +522,14 @@ function finishAllColumn()
   m = Math.floor (s / 60);
   s -= (m * 60);
 
-  alert("結果：" + score + "点。所要時間：" + m + "分" + s + "秒。お疲れ様でした");
+  var passScore = parseInt( $("#passScore").val() );
+
+  if(score >= passScore)
+  {
+    $("#sheetComplete").show();
+  }
+
+  alert("結果：" + score + "点。所要時間：" + m + "分" + s + "秒。おつかれさま！");
 }
 
 
@@ -505,7 +538,8 @@ function main()
 {
   remake();
   gotoXY(startX, startY);
-  $("#startButton").blur();  // 「最初から」ボタンを押した後に、スペースキー等入力によるご動作を防ぐ
+  //$("#startButton").blur();  // 「最初から」ボタンを押した後に、スペースキー等入力によるご動作を防ぐ
+  $("#keyboardEnabler").focus();  // スマホ対応
 }
 
 // --------------------------------------------------
@@ -514,8 +548,11 @@ function main()
 <br><br>
 <hr>
 (c) Nozomi<br>
+v1.2  2015/07/25  合格点のときにはなまるを表示 (標準では95点で合格)・タブレットとりあえず対応 (スマホでも動くけど画面小さすぎ)<br>
+<!--
 v1.1  2015/07/23  効果音と「Ｘ」画像を追加<br>
-<!-- v1.0  2015/07/22  1st ver.<br> -->
+v1.0  2015/07/22  1st ver.<br>
+-->
 <br>
 効果音：<a href="http://musicisvfr.com/free/se/quiz01.html">Music VFR</a>さまで公開されている素材を利用 (CC BY 4.0ライセンス)
 </body>
