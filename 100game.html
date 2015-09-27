@@ -1,12 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
 
 <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script-->
 <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
 <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script-->
 <!--script type="text/javascript" src="jquery-1.11.3.min.js"></script-->
 
+
+<!-- デバッグ用 -->
+<style type="text/css">
+  .controller {   display:none /**/ }  /* デバッグ用情報を表示 */
+</style>
+<script type="text/javascript">
+  var startX = 1;  // この座標のマスから始める
+  var startY = 1;
+</script>
+
+
+<!-- ここからメイン -->
 <style type="text/css">
   .sheet { background: #eee }                /* 表全体 */
   .currentColumn { background: #ffa }        /* フォーカスのあるマス */
@@ -14,12 +27,11 @@
      background: #cff;
      color: #f00
   }
-  .correctColumn { background: #ddd }
-  .wrongColumn { background: #fee }
-
-
-  .controller {  display:none /**/ }               /* 内部制御用。debug中は表示、リリース時に隠す */
-
+  .correctColumn { background: #ddd }        /* 正解マス */
+  .wrongColumn {                             /* 間違ったマス */
+    background: #fdd;
+    background-image: url("wrongAnswer.png")
+  }
 </style>
 
 </head>
@@ -38,6 +50,7 @@
 </select>
 　　<button id="startButton" onclick="main()">最初から</button>
 　　得点：<input type="text" size=2 id="score">
+　　音：<input type="checkbox" id="soundEnabled" checked="checked">
 <br>
 <br>
 <!--
@@ -106,6 +119,16 @@
 // --------------------------------------------------
 // グローバル変数
 var startTime = 0;
+
+// --------------------------------------------------
+// 効果音
+// 先読みのため初回にグローバル変数を作っておく
+// ブラウザによっては、初回再生前に頭出し処理ができないため、再生したかどうかのフラグを置く
+var soundCorrect = new Audio("Quiz-Correct_Answer02-1.mp3");
+var soundWrong = new Audio("Quiz-Wrong_Buzzer02-1.mp3");
+var soundCorrectPlayed = 0;
+var soundWrongPlayed = 0;
+
 
 // --------------------------------------------------
 function makeColumnName(x, y)
@@ -322,6 +345,45 @@ $(window).keydown(function(e)
 
 
 // --------------------------------------------------
+function playSound(n)
+  // n番目の音を再生。現状 n は1(Correct) or 2(Wrong) の決め打ち
+{
+  var soundEnabled = $("#soundEnabled").prop("checked");
+  if(! soundEnabled)
+  {
+    return;
+  }
+
+  if(n == 1)
+  {
+    if(soundCorrectPlayed == 0)
+    {
+      soundCorrectPlayed = 1;
+    }
+    else
+    {
+      soundCorrect.currentTime = 0;
+    }
+    soundCorrect.play();
+  }
+  else if(n == 2)
+  {
+
+    if(soundWrongPlayed == 0)
+    {
+      soundWrongPlayed = 1;
+    }
+    else
+    {
+      soundWrong.currentTime = 0;
+    }
+    soundWrong.play();
+
+  }
+
+}
+
+// --------------------------------------------------
 function inputandCheckAnswer(n)
   // 値を入力、入力された値を確認
   // n：0～9＝数字、10＝BS
@@ -381,11 +443,13 @@ function inputandCheckAnswer(n)
     var score = $("#score").val();
     score++;
     $("#score").val(score);
+    playSound(1);
     gotoNext();
   }
   else if(correctAnswerKeta <= inputAnswerKeta)  // 入力桁数と正答桁数が同じ、かつ、不正解(不正解確定)
   {
     $(columnName).addClass("wrongColumn");
+    playSound(2);
     gotoNext();
   }
   else  // 入力桁数が正答桁数に満たない
@@ -440,7 +504,7 @@ function finishAllColumn()
 function main()
 {
   remake();
-  gotoXY(1,1);
+  gotoXY(startX, startY);
   $("#startButton").blur();  // 「最初から」ボタンを押した後に、スペースキー等入力によるご動作を防ぐ
 }
 
@@ -450,7 +514,9 @@ function main()
 <br><br>
 <hr>
 (c) Nozomi<br>
-v1.0  2015/07/22  1st ver.<br>
-
+v1.1  2015/07/23  効果音と「Ｘ」画像を追加<br>
+<!-- v1.0  2015/07/22  1st ver.<br> -->
+<br>
+効果音：<a href="http://musicisvfr.com/free/se/quiz01.html">Music VFR</a>さまで公開されている素材を利用 (CC BY 4.0ライセンス)
 </body>
 </html>
