@@ -280,8 +280,10 @@ function remake()
   else if(calcType == "div_2_1")   { minX=10;  maxX=99;  minY=2;   maxY=9;   typestr="わりざん";  $("#selfDecide").hide();  }
   else if(calcType == "add_self" || calcType == "mul_self")  {
     minX=parseInt($("#selfMinX").val());  maxX=parseInt($("#selfMaxX").val());
+    if(minX <  0)    { minX = 0;       $("#selfMinX").val(minX)  };
     if(maxX <= minX) { maxX = minX+1;  $("#selfMaxX").val(maxX)  };
     minY=parseInt($("#selfMinY").val());  maxY=parseInt($("#selfMaxY").val());
+    if(minY <  0)    { minY = 0;       $("#selfMinY").val(minY)  };
     if(maxY <= minY) { maxY = minY+1;  $("#selfMaxY").val(maxY)  };
     if(calcType == "add_self") {  typestr="足しざん";  } else {  typestr="かけざん";  }
     $("#selfDecide").show();
