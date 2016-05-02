@@ -2,11 +2,10 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=800px, initial-scale=1.0">
+<meta name="viewport" content="width=800, initial-scale=1.0">
 <!-- ここに user-scalable=no をつけると拡大縮小できなくなるが、使いにくいので書かないことにする -->
 
-<!--script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script-->
-<script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="jquery-2.2.3.min.js"></script>
 
 
 <!-- デバッグ用 -------------------------------------------------- -->
@@ -92,6 +91,12 @@
     text-align: center;
     color: green;
     font-weight: bold;
+  }
+  .selfDecide {                              /* 自分で決めるときに表示 */
+    display: show;
+  }
+  .selfDecide input {
+    width: 50px;
   }
 
 </style>
@@ -264,19 +269,26 @@ function remake()
   var calcType = $("#calcType").val();
 
   var minX, maxX, minY, maxY, typestr;
-  if     (calcType == "add_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="足しざん";  }
-  else if(calcType == "add_2_1")   { minX=10;  maxX=99;  minY=1;   maxY=9;   typestr="足しざん";  }
-  else if(calcType == "add_1_2")   { minX=1;   maxX=9;   minY=10;  maxY=99;  typestr="足しざん";  }
-  else if(calcType == "add_2s_2s") { minX=10;  maxX=19;  minY=10;  maxY=19;  typestr="足しざん";  }
-  else if(calcType == "add_2_2")   { minX=10;  maxX=99;  minY=10;  maxY=99;  typestr="足しざん";  }
-  else if(calcType == "add_3_3")   { minX=100; maxX=999; minY=100; maxY=999; typestr="足しざん";  }
-  else if(calcType == "sub_2_1")   { minX=10;  maxX=19;  minY=1;   maxY=9;   typestr="引きざん";  }
-  else if(calcType == "mul_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="かけざん";  }
-  else if(calcType == "div_2_1")   { minX=10;  maxX=99;  minY=2;   maxY=9;   typestr="わりざん";  }
+  if     (calcType == "add_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_2_1")   { minX=10;  maxX=99;  minY=1;   maxY=9;   typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_1_2")   { minX=1;   maxX=9;   minY=10;  maxY=99;  typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_2s_2s") { minX=10;  maxX=19;  minY=10;  maxY=19;  typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_2_2")   { minX=10;  maxX=99;  minY=10;  maxY=99;  typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_3_3")   { minX=100; maxX=999; minY=100; maxY=999; typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "sub_2_1")   { minX=10;  maxX=19;  minY=1;   maxY=9;   typestr="引きざん";  $("#selfDecide").hide();  }
+  else if(calcType == "mul_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="かけざん";  $("#selfDecide").hide();  }
+  else if(calcType == "div_2_1")   { minX=10;  maxX=99;  minY=2;   maxY=9;   typestr="わりざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_self" || calcType == "mul_self")  {
+    minX=parseInt($("#selfMinX").val());  maxX=parseInt($("#selfMaxX").val());
+    if(maxX <= minX) { maxX = minX+1;  $("#selfMaxX").val(maxX)  };
+    minY=parseInt($("#selfMinY").val());  maxY=parseInt($("#selfMaxY").val());
+    if(maxY <= minY) { maxY = minY+1;  $("#selfMaxY").val(maxY)  };
+    if(calcType == "add_self") {  typestr="足しざん";  } else {  typestr="かけざん";  }
+    $("#selfDecide").show();
+  }
   else                             { alert("プログラムのどこかにミスがある模様(r)");  return;  }
 
   $("#calcTypeStr").val(typestr);
-
 
 
   // table タグを生成。割り算時にはテーブル構成が変わるので表自体を動的生成する
@@ -826,6 +838,8 @@ function main()
 <option value="sub_2_1">引き算 (２けた－１けた)
 <option value="mul_1_1">かけ算 (１けた)
 <option value="div_2_1">わり算 (２けた÷１けた)
+<option value="add_self">足し算 (自分で決める)
+<option value="mul_self">かけ算 (自分で決める)
 </select>
 　<button id="startButton" onclick="main()">はじめから</button>
 　　スコア <input type="text" size=2 id="score">
@@ -864,7 +878,15 @@ function main()
 </div>
 
 <br>
-<div  class="controller"><!-- ここはリリース時には表示されない部分 -->
+<div id="selfDecide" class="selfDecide"><!-- 自分で決めるときに表示 -->
+ 縦の列: <input type="number" size=1 id="selfMinY" value="1" onchange="main();">
+ ～      <input type="number" size=1 id="selfMaxY" value="9" onchange="main();">
+ 横の列: <input type="number" size=1 id="selfMinX" value="1" onchange="main();">
+ ～      <input type="number" size=1 id="selfMaxX" value="9" onchange="main();">
+</div>
+
+<br>
+<div class="controller"><!-- ここはリリース時には表示されない部分 -->
  設定：<select name="passScore" id="passScore">
  <option value="100">100
  <option value="98">98
@@ -887,8 +909,9 @@ function main()
 <br><br>
 <hr>
 (c) Nozomi<br>
-v1.5.2  2015/10/03  ソフトウェアキーボードを縦型に変更<br>
+v1.6.0  2015/10/03  加算・乗算で「自分で決める」追加<br>
 <!--
+v1.5.2  2015/10/03  ソフトウェアキーボードを縦型に変更<br>
 v1.5.1  2015/09/28  ソフトウェアキーボードに計算式を表示<br>
 v1.5    2015/09/27  ソフトウェアキーボードの表示<br>
 v1.4.2  2015/09/27  除算時、商を誤答したら、剰余をスキップ<br>
