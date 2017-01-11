@@ -758,11 +758,12 @@ function finishRow(y)
 
     var columnName = makeColumnName(11, y);          // perfect文字書き込み
 
-    var r = randN(1,5,0);
+    var r = randN(1,6,0);
     if     (r == 1) {  $(columnName).text(" Perfect");  }
     else if(r == 2) {  $(columnName).text(" Excelent");  }
     else if(r == 3) {  $(columnName).text(" Fantastic");  }
     else if(r == 4) {  $(columnName).text(" Cool");  }
+    else if(r == 5) {  $(columnName).text(" Bravo");  }
     else            {  $(columnName).text(" Good Job");  }
   }
 
@@ -911,6 +912,7 @@ function main()
 <br><br>
 <hr>
 (c) Nozomi<br>
+v1.6.1  2017/01/12  メッセージ種類追加<br>
 v1.6.0  2015/10/03  加算・乗算で「自分で決める」追加<br>
 <!--
 v1.5.2  2015/10/03  ソフトウェアキーボードを縦型に変更<br>
