@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=800, initial-scale=1.0">
 <!-- ここに user-scalable=no をつけると拡大縮小できなくなるが、使いにくいので書かないことにする -->
 
+<title>みんなの100ます計算</title>
+
 <script type="text/javascript" src="jquery-2.2.3.min.js"></script>
 
 
@@ -196,6 +198,12 @@ function showSoftKey(x, y)
   {
     left -= 20;
   }
+
+  if(left + width > $(window).width())
+  {
+    left = $(window).width() - width;
+  }
+
 
 
   var calcStr = $("#currentQuestionX").val();             // 問の表示
@@ -590,6 +598,7 @@ function inputandCheckAnswer(n)
     return;
   }
 
+
   if(inputAnswer == "" && n == 10)                       // BS・DELであり、既に入力した文字が無い場合 → 何もせず帰る
   {
     return;
@@ -912,9 +921,10 @@ function main()
 <br><br>
 <hr>
 (c) Nozomi<br>
+v1.6.1  2017/01/21  (BugFix)画面サイズが小さい場合にソフトキーボードが潰れる (まだ抜けているケースは残っている模様)<br>
+<!--
 v1.6.1  2017/01/12  メッセージ種類追加<br>
 v1.6.0  2015/10/03  加算・乗算で「自分で決める」追加<br>
-<!--
 v1.5.2  2015/10/03  ソフトウェアキーボードを縦型に変更<br>
 v1.5.1  2015/09/28  ソフトウェアキーボードに計算式を表示<br>
 v1.5    2015/09/27  ソフトウェアキーボードの表示<br>
