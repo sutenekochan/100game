@@ -7,7 +7,8 @@
 
 <title>みんなの100ます計算</title>
 
-<script type="text/javascript" src="jquery-2.2.3.min.js"></script>
+<!--script type="text/javascript" src="jquery-2.2.3.min.js"></script-->
+<script type="text/javascript" src="jquery-3.1.1.min.js"></script>
 
 
 <!-- デバッグ用 -------------------------------------------------- -->
@@ -253,14 +254,21 @@ function showHideSoftKey()
 
 
 // --------------------------------------------------
-function randN(min, max, prev)
+function randN(min, max, point, prev)
   // 最小値～最大値の範囲で乱数を返す
   // 前回の値を指定することで、前回の値と違う値を返す (同じ数字が連続しない機能)
-  // 引数：乱数の最小値、最大値、前回の値
+  // 引数：乱数の最小値、最大値、小数点以下桁数、前回の値
 {
   for(;;)
   {
     var x = Math.floor(Math.random() * (max-min+1)) + min;
+
+    if(point > 0)
+    {
+      x += ".";
+      for(var y=0; y<point; y++) { x += Math.floor(Math.random()*10); }
+    }
+
     if(x != prev)
     {
       return x;
@@ -277,20 +285,25 @@ function remake()
   var calcType = $("#calcType").val();
 
   var minX, maxX, minY, maxY, typestr;
-  if     (calcType == "add_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="足しざん";  $("#selfDecide").hide();  }
-  else if(calcType == "add_2_1")   { minX=10;  maxX=99;  minY=1;   maxY=9;   typestr="足しざん";  $("#selfDecide").hide();  }
-  else if(calcType == "add_1_2")   { minX=1;   maxX=9;   minY=10;  maxY=99;  typestr="足しざん";  $("#selfDecide").hide();  }
-  else if(calcType == "add_2s_2s") { minX=10;  maxX=19;  minY=10;  maxY=19;  typestr="足しざん";  $("#selfDecide").hide();  }
-  else if(calcType == "add_2_2")   { minX=10;  maxX=99;  minY=10;  maxY=99;  typestr="足しざん";  $("#selfDecide").hide();  }
-  else if(calcType == "add_3_3")   { minX=100; maxX=999; minY=100; maxY=999; typestr="足しざん";  $("#selfDecide").hide();  }
-  else if(calcType == "sub_2_1")   { minX=10;  maxX=19;  minY=1;   maxY=9;   typestr="引きざん";  $("#selfDecide").hide();  }
-  else if(calcType == "mul_1_1")   { minX=1;   maxX=9;   minY=1;   maxY=9;   typestr="かけざん";  $("#selfDecide").hide();  }
-  else if(calcType == "div_2_1")   { minX=10;  maxX=99;  minY=2;   maxY=9;   typestr="わりざん";  $("#selfDecide").hide();  }
+  if     (calcType == "add_1_1")   { minX=1;   maxX=9;   pointX=0;  minY=1;   maxY=9;   pointY=0;  typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_2_1")   { minX=10;  maxX=99;  pointX=0;  minY=1;   maxY=9;   pointY=0;  typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_1_2")   { minX=1;   maxX=9;   pointX=0;  minY=10;  maxY=99;  pointY=0;  typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_2s_2s") { minX=10;  maxX=19;  pointX=0;  minY=10;  maxY=19;  pointY=0;  typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_2_2")   { minX=10;  maxX=99;  pointX=0;  minY=10;  maxY=99;  pointY=0;  typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_1x_1")  { minX=1;   maxX=9;   pointX=1;  minY=1;   maxY=9;   pointY=0;  typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_1x_1x") { minX=1;   maxX=9;   pointX=1;  minY=1;   maxY=9;   pointY=1;  typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "add_3_3")   { minX=100; maxX=999; pointX=0;  minY=100; maxY=999; pointY=0;  typestr="足しざん";  $("#selfDecide").hide();  }
+  else if(calcType == "sub_2_1")   { minX=10;  maxX=19;  pointX=0;  minY=1;   maxY=9;   pointY=0;  typestr="引きざん";  $("#selfDecide").hide();  }
+  else if(calcType == "mul_1_1")   { minX=1;   maxX=9;   pointX=0;  minY=1;   maxY=9;   pointY=0;  typestr="かけざん";  $("#selfDecide").hide();  }
+  else if(calcType == "mul_2_2")   { minX=1;   maxX=99;  pointX=0;  minY=1;   maxY=99;  pointY=0;  typestr="かけざん";  $("#selfDecide").hide();  }
+  else if(calcType == "mul_1x_1")  { minX=1;   maxX=9;   pointX=1;  minY=1;   maxY=9;   pointY=0;  typestr="かけざん";  $("#selfDecide").hide();  }
+  else if(calcType == "mul_1x_1x") { minX=1;   maxX=9;   pointX=1;  minY=1;   maxY=9;   pointY=1;  typestr="かけざん";  $("#selfDecide").hide();  }
+  else if(calcType == "div_2_1")   { minX=10;  maxX=99;  pointX=0;  minY=2;   maxY=9;   pointY=0;  typestr="わりざん";  $("#selfDecide").hide();  }
   else if(calcType == "add_self" || calcType == "mul_self")  {
-    minX=parseInt($("#selfMinX").val());  maxX=parseInt($("#selfMaxX").val());
+    minX=parseInt($("#selfMinX").val());  maxX=parseInt($("#selfMaxX").val());  pointX=parseInt($("#selfPointX").val());
     if(minX <  0)    { minX = 0;       $("#selfMinX").val(minX)  };
     if(maxX <= minX) { maxX = minX+1;  $("#selfMaxX").val(maxX)  };
-    minY=parseInt($("#selfMinY").val());  maxY=parseInt($("#selfMaxY").val());
+    minY=parseInt($("#selfMinY").val());  maxY=parseInt($("#selfMaxY").val());  pointY=parseInt($("#selfPointY").val());
     if(minY <  0)    { minY = 0;       $("#selfMinY").val(minY)  };
     if(maxY <= minY) { maxY = minY+1;  $("#selfMaxY").val(maxY)  };
     if(calcType == "add_self") {  typestr="足しざん";  } else {  typestr="かけざん";  }
@@ -298,7 +311,13 @@ function remake()
   }
   else                             { alert("プログラムのどこかにミスがある模様(r)");  return;  }
 
-  $("#calcTypeStr").val(typestr);
+  $("#calcTypeStr").val(typestr);  // 値を保存
+  $("#calcMinX").val(minX);
+  $("#calcMaxX").val(maxX);
+  $("#calcPointX").val(pointX);
+  $("#calcMinY").val(minY);
+  $("#calcMaxY").val(maxY);
+  $("#calcPointY").val(pointY);
 
 
   // table タグを生成。割り算時にはテーブル構成が変わるので表自体を動的生成する
@@ -312,7 +331,7 @@ function remake()
   var x1=0, x2;
   for(var cols=0; cols<10; cols++) {
     var columnName = makeColumnName(cols+1, 0, 1);
-    x2 = randN(minX, maxX, x1);
+    x2 = randN(minX, maxX, pointX, x1);
     sheetstr += '<th width=50px id="' + columnName + '">' + x2;
     x1 = x2;
   }
@@ -328,7 +347,7 @@ function remake()
     for(var rows=0; rows<10; rows++)
     {
       var columnName = makeColumnName(0, rows+1, 1);       // 左の数値
-      y2 = randN(minY,maxY,y1);
+      y2 = randN(minY, maxY, pointY, y1);
       sheetstr += '<tr height=50px>';
       sheetstr += '<th id="' + columnName + '">' + y2;
       y1 = y2;
@@ -353,7 +372,7 @@ function remake()
     for(var rows=0; rows<5; rows++)
     {
       var columnName = makeColumnName(0, rows*2+1, 1);     // 左の数値
-      y2 = randN(minY,maxY,y1);
+      y2 = randN(minY, maxY, pointY, y1);
       sheetstr += '<tr height=40px>';
       sheetstr += '<th rowspan=3 id="' + columnName + '">' + y2;
       y1 = y2;
@@ -414,30 +433,6 @@ function remake()
 
 
 // --------------------------------------------------
-function calcKeta(n)
-  // nの桁数を求める
-  // nは0以上の整数であること。引数チェックはしていない
-{
-  var i = 1;
-  var ii = 1;
-
-  // 0の場合だけ特別扱い
-  if(n==0)
-  {
-    return 1;
-  }
-
-  for(;;)
-  {
-    if(ii <= n && n < ii*10) { return i; }
-    i++;
-    ii *= 10;
-  }
-}
-
-
-
-// --------------------------------------------------
 function gotoXY(x,y)
   // (x,y) の座標に進む
   // 昔の場所の色を消し、新しい場所に色を付ける
@@ -463,16 +458,45 @@ function gotoXY(x,y)
   var valueY = $(columnNameY).text();
   $("#currentQuestionY").val(valueY);
 
-  var answer;                                // 解を求める
-  if     (calcType == "足しざん") { answer = parseInt(valueX) + parseInt(valueY); }  // parseIntなしでは文字列の加算になる
+  var answer;                                // 解を求める。ParseFloat を使ってしまうと(2の基数の関係で)0.1等で誤差がでるので愚直に計算する
+  if (calcType == "足しざん")
+  {
+    var zureX = parseInt($("#calcPointX").val());
+    var zureY = parseInt($("#calcPointY").val());
+    var zure = Math.max(zureX,zureY);
+    valueX = valueX.replace('.','');
+    valueY = valueY.replace('.','');
+    if(zureX > zureY) { valueY *= Math.pow(10,zureX-zureY); }
+    if(zureY > zureX) { valueX *= Math.pow(10,zureY-zureX); }
+    answer = parseInt(valueX) + parseInt(valueY);  // parseIntなしでは文字列の加算になる
+    if(zure > 0)
+    {
+      var answer2 = (""+answer).slice(-1 * zure);
+      answer = (""+answer).slice(0, -1 * zure) + "." + answer2;
+      //alert("x:"+valueX + " / y:"+valueY + " / add:"+ (parseInt(valueX) + parseInt(valueY)) + " / zure:"+zure + " / ans2:" + answer2 + "/ ans:" + answer);
+    }
+
+  }
   else if(calcType == "引きざん") { answer = valueX - valueY; }
-  else if(calcType == "かけざん") { answer = valueX * valueY; }
+  else if(calcType == "かけざん")
+  {
+    var zure = parseInt($("#calcPointX").val()) + parseInt($("#calcPointY").val());
+    valueX = valueX.replace('.','');
+    valueY = valueY.replace('.','');
+    answer = valueX * valueY;
+    if(zure > 0)
+    {
+      var answer2 = (""+answer).slice(-1 * zure);
+      answer = (""+answer).slice(0, -1 * zure) + "." + answer2;
+    }
+  }
   else if(calcType == "わりざん" && y%2 == 1) { answer = Math.floor(valueX / valueY); }
   else if(calcType == "わりざん") { answer = valueX % valueY; }
   else                            { alert("プログラムのどこかにミスがある模様(g)");  return; }
+
   $("#correctAnswer").val(answer);
 
-  var keta = calcKeta(answer);               // 解の桁数を求める。入力を受け付ける際に使用する
+  var keta = (""+answer).length;             // 解の桁数を求める。入力を受け付ける際に使用する。""を足して文字列扱いしないとバグる
   $("#correctAnswerKeta").val(keta);
 
   $("#inputAnswer").val("");                 // 入力中の値をクリア
@@ -488,18 +512,18 @@ $(window).keydown(function(e)
 {
   var k = e.keyCode;
   var n = -1;
-  if     (k==96  || k==48) {  n=0;   }  // テンキー「0」と通常キー「0」。以下同じ
-  else if(k==97  || k==49) {  n=1;   }
-  else if(k==98  || k==50) {  n=2;   }
-  else if(k==99  || k==51) {  n=3;   }
-  else if(k==100 || k==52) {  n=4;   }
-  else if(k==101 || k==53) {  n=5;   }
-  else if(k==102 || k==54) {  n=6;   }
-  else if(k==103 || k==55) {  n=7;   }
-  else if(k==104 || k==56) {  n=8;   }
-  else if(k==105 || k==57) {  n=9;   }
-  else if(k==8   || k==46) {  n=10;  }  // 「BS」「DEL」
-
+  if     (k==96  || k==48 ) {  n=0;   }  // テンキー「0」と通常キー「0」。以下同じ
+  else if(k==97  || k==49 ) {  n=1;   }
+  else if(k==98  || k==50 ) {  n=2;   }
+  else if(k==99  || k==51 ) {  n=3;   }
+  else if(k==100 || k==52 ) {  n=4;   }
+  else if(k==101 || k==53 ) {  n=5;   }
+  else if(k==102 || k==54 ) {  n=6;   }
+  else if(k==103 || k==55 ) {  n=7;   }
+  else if(k==104 || k==56 ) {  n=8;   }
+  else if(k==105 || k==57 ) {  n=9;   }
+  else if(k==8   || k==46 ) {  n=10;  }  // 「BS」「DEL」
+  else if(k==110 || k==190) {  n=11;  }  // テンキーの小数点、通常キーの小数点
 
   if(n != -1)
   {
@@ -581,7 +605,25 @@ function playSound(n)
 // --------------------------------------------------
 function inputandCheckAnswer(n)
   // 値を入力、入力された値を確認
-  // n：0～9＝数字、10＝BS
+  // n：0～9＝数字、10＝BS、11＝小数点
+  //
+  //
+  //※以下のオートマトンではBSは省略してある
+  //
+  //                       +-+ 0
+  //          0           ↓ |      .
+  //  [start] -----------> [0] ------------------------+
+  //   |.  |                |1-9                       |
+  //   |   |1-9            ↓   .                      |
+  //   |   +-------------> [n]---------------------+   |
+  //   |                   ↑ |0-9                 |   |
+  //   |                    +-+                    |   |
+  //   |                                          ↓  ↓
+  //   +-----------------------------------------> [n.m]
+  //                                                ↑ |0-9. ※.の場合は何もしない
+  //                                                 +-+
+
+
 {
   if(startTime == 0)                                     // 初回の入力の場合＝解答はじめ。開始時間をセット
   {
@@ -593,35 +635,88 @@ function inputandCheckAnswer(n)
 
   var inputAnswer = $("#inputAnswer").val();             // columnName を直接扱うと、空白文字のせいで誤動作するため、入力中文字専用の記憶エリアを設けてある
 
-  if(inputAnswer == "" && n == 0 && correctAnswer != 0)  // 最初の文字が0、かつ、正解が0でない → 0ではじまる数値は無いので何もせず帰る
-  {
-    return;
-  }
 
-
-  if(inputAnswer == "" && n == 10)                       // BS・DELであり、既に入力した文字が無い場合 → 何もせず帰る
-  {
-    return;
-  }
-
-  if(0 <= n && n <= 9)                                   // 数値の場合
-  {
-    inputAnswer += n;
-  }
-
-  else if(n == 10)                                       // BS・DELの場合
-  {
-    inputAnswer = Math.floor(inputAnswer / 10);
-    if(inputAnswer == 0) { inputAnswer = ""; }
-  }
-
-  else
+  if(n < 0 || n > 11)                                    // エラーチェック
   {
     alert("プログラムのどこかにミスがある模様(i)");
     return;
   }
 
-  var inputAnswerKeta = calcKeta(inputAnswer);
+  else if(inputAnswer === "")                            // オートマトンの [start] の位置の場合
+  {
+    if(n == 0)
+    {
+      inputAnswer = "0";
+    }
+    else if(1<=n && n<=9)
+    {
+      inputAnswer = ("" + n);
+    }
+    else if(n == 10)
+    {
+      //何もしない
+    }
+    else if(n == 11)
+    {
+      inputAnswer = "0.";
+    }
+  }
+
+  else if(inputAnswer === "0")                            // オートマトンの [0] の位置の場合
+  {
+    if(n == 0)
+    {
+      // 何もしない
+    }
+    else if(1<=n && n<=9)
+    {
+      inputAnswer = ("" + n);
+    }
+    else if(n == 10)
+    {
+      inputAnswer = "";
+    }
+    else if(n == 11)
+    {
+      inputAnswer = "0.";
+    }
+  }
+
+  else if(inputAnswer.indexOf(".") < 0)                   // オートマトンの [n] の位置の場合
+  {
+    if(0<=n && n<=9)
+    {
+      inputAnswer += ("" + n);
+    }
+    else if(n == 10)
+    {
+      inputAnswer = inputAnswer.slice(0,-1);
+    }
+    else if(n == 11)
+    {
+      inputAnswer += ".";
+    }
+  }
+
+
+  else                                                    // オートマトンの [n.m] の位置の場合
+  {
+    if(0<=n && n<=9)
+    {
+      inputAnswer += ("" + n);
+    }
+    else if(n == 10)
+    {
+      inputAnswer = inputAnswer.slice(0,-1);
+    }
+    else if(n == 11)
+    {
+      //何もしない
+    }
+  }
+
+
+  var inputAnswerKeta = inputAnswer.length;
 
   if(correctAnswerKeta < inputAnswerKeta)               // 入力桁数が正解桁数より多い (最後のマスで入力を続けると起こる) → 無視して戻る
   {
@@ -767,7 +862,7 @@ function finishRow(y)
 
     var columnName = makeColumnName(11, y);          // perfect文字書き込み
 
-    var r = randN(1,6,0);
+    var r = randN(1,6,0,0);
     if     (r == 1) {  $(columnName).text(" Perfect");  }
     else if(r == 2) {  $(columnName).text(" Excelent");  }
     else if(r == 3) {  $(columnName).text(" Fantastic");  }
@@ -846,12 +941,18 @@ function main()
 <option value="add_1_2">足し算 (１けた＋２けた)
 <option value="add_2s_2s">足し算 (１９までの２けた)
 <option value="add_2_2">足し算 (２けた)
+<option value="add_1x_1">足し算 (小数点あり１けた＋１けた)
+<option value="add_1x_1x">足し算 (小数点あり１けた)
 <option value="add_3_3">足し算 (３けた) ※超絶難易度
 <option value="sub_2_1">引き算 (２けた－１けた)
 <option value="mul_1_1">かけ算 (１けた)
+<option value="mul_2_2">かけ算 (２けた)
+<option value="mul_1x_1">かけ算 (小数点あり１けた×１けた)
+<option value="mul_1x_1x">かけ算 (小数点あり１けた)
 <option value="div_2_1">わり算 (２けた÷１けた)
 <option value="add_self">足し算 (自分で決める)
 <option value="mul_self">かけ算 (自分で決める)
+<!-- 引き算、割り算の場合は、自分で決めるといろいろ不都合があるのでやらないこと -->
 </select>
 　<button id="startButton" onclick="main()">はじめから</button>
 　　スコア <input type="text" size=2 id="score">
@@ -885,16 +986,19 @@ function main()
 <td onclick="inputandCheckAnswer(9)">9
 <tr>
 <td onclick="inputandCheckAnswer(0)">0
-<td colspan=2 onclick="inputandCheckAnswer(10)">←
+<td onclick="inputandCheckAnswer(11)">.
+<td onclick="inputandCheckAnswer(10)">←
 </table>
 </div>
 
 <br>
 <div id="selfDecide" class="selfDecide"><!-- 自分で決めるときに表示 -->
- 縦の列: <input type="number" size=1 id="selfMinY" value="1" onchange="main();">
- ～      <input type="number" size=1 id="selfMaxY" value="9" onchange="main();">
- 横の列: <input type="number" size=1 id="selfMinX" value="1" onchange="main();">
- ～      <input type="number" size=1 id="selfMaxX" value="9" onchange="main();">
+ 縦の列:    <input type="number" size=1 id="selfMinY"   value="1" onchange="main();">
+ ～         <input type="number" size=1 id="selfMaxY"   value="9" onchange="main();">
+ 小数点以下 <input type="number" size=1 id="selfPointY" value="0" onchange="main();">けた<br>
+ 横の列:    <input type="number" size=1 id="selfMinX"   value="1" onchange="main();">
+ ～         <input type="number" size=1 id="selfMaxX"   value="9" onchange="main();">
+ 小数点以下 <input type="number" size=1 id="selfPointX" value="0" onchange="main();">けた<br>
 </div>
 
 <br>
@@ -907,11 +1011,13 @@ function main()
  <option value="1">1
  </select> 点でクリア
  <br><br>
- タイプ：<input type="text" size=4 id="calcTypeStr">
- 座標X: <input type="text" size=1 id="currentColumnX">
- 座標Y: <input type="text" size=1 id="currentColumnY">
- 数値1: <input type="text" size=1 id="currentQuestionX">
- 数値2: <input type="text" size=1 id="currentQuestionY"><br>
+ タイプ：<input type="text" size=4 id="calcTypeStr">　
+ X軸数値：<input type="text" size=2 id="calcMinX"> ～ <input type="text" size=2 id="calcMaxX"> 小数桁<input type="text" size=2 id="calcPointX">　
+ Y軸数値：<input type="text" size=2 id="calcMinY"> ～ <input type="text" size=2 id="calcMaxY"> 小数桁<input type="text" size=2 id="calcPointY"><br>
+ 座標X：<input type="text" size=1 id="currentColumnX">
+ 座標Y：<input type="text" size=1 id="currentColumnY">　
+ 数値1：<input type="text" size=1 id="currentQuestionX">
+ 数値2：<input type="text" size=1 id="currentQuestionY"><br>
  正解：<input type="text" size=2 id="correctAnswer">
  正解の桁数：<input type="text" size=1 id="correctAnswerKeta"><br>
  入力中の値：<input type="text" size=2 id="inputAnswer">
@@ -921,8 +1027,9 @@ function main()
 <br><br>
 <hr>
 (c) Nozomi<br>
-v1.6.1  2017/01/21  (BugFix)画面サイズが小さい場合にソフトキーボードが潰れる (まだ抜けているケースは残っている模様)<br>
+v1.7    2017/02/15  jQueryをver.3系列に変更、小数点の加算・乗算追加<br>
 <!--
+v1.6.2  2017/01/21  (BugFix)画面サイズが小さい場合にソフトキーボードが潰れる (まだ抜けているケースは残っている模様)<br>
 v1.6.1  2017/01/12  メッセージ種類追加<br>
 v1.6.0  2015/10/03  加算・乗算で「自分で決める」追加<br>
 v1.5.2  2015/10/03  ソフトウェアキーボードを縦型に変更<br>
