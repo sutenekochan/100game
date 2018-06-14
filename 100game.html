@@ -303,9 +303,11 @@ function remake()
     minX=parseInt($("#selfMinX").val());  maxX=parseInt($("#selfMaxX").val());  pointX=parseInt($("#selfPointX").val());
     if(minX <  0)    { minX = 0;       $("#selfMinX").val(minX)  };
     if(maxX <= minX) { maxX = minX+1;  $("#selfMaxX").val(maxX)  };
+    if(pointX < 0)   { pointX = 0;     $("#selfPointX").val(pointX)  };
     minY=parseInt($("#selfMinY").val());  maxY=parseInt($("#selfMaxY").val());  pointY=parseInt($("#selfPointY").val());
     if(minY <  0)    { minY = 0;       $("#selfMinY").val(minY)  };
     if(maxY <= minY) { maxY = minY+1;  $("#selfMaxY").val(maxY)  };
+    if(pointY < 0)   { pointY = 0;     $("#selfPointY").val(pointY)  };
     if(calcType == "add_self") {  typestr="足しざん";  } else {  typestr="かけざん";  }
     $("#selfDecide").show();
   }
